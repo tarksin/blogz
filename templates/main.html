@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+
+{% block content%}
+<h2>Posts</h2>
+
+{% for post in posts %}
+  <a href="{{ url_for('article', id=post.id) }}">{{ post.title }}</a>
+  <p>{{ post.body }}</p>
+{% endfor %}
+
+{% endblock %}
