@@ -16,6 +16,8 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120))
     body = db.Column(db.String(512))
+    time_created = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
+    # owner_id = db.Column(db.Integer, foreign_key=True)
 
     def __init__(self, title, body):
         self.title = title

@@ -3,7 +3,8 @@
 
 {% block content%}
 
-  <h4>{{ post.title}}</h4>
+  <h4 class="title" style="color:purple;">{{ post.title}}</h4>
   <p>{{ post.body }}</p>
+  <p class='post-author'>Created: {{ post.time_created }}</p>
 
 {% endblock %}

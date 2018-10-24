@@ -1,7 +1,18 @@
+body {
+      font-family: 'Ubuntu', sans-serif;
+    }
+
 .error {
       color: red;
     }
 
-body {
-      font-family: 'Ubuntu', sans-serif;
-    }
+
+.post-author {
+  font-size: 12px;
+  font-style: italic;
+}
+
+
+.title {
+  color: purple;
+}
