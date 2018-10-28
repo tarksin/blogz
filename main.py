@@ -1,5 +1,5 @@
 
-from flask import Flask, request, redirect, render_template, session, url_for
+from flask import Flask, request, redirect, render_template, session, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 import cgi
 import pymysql
@@ -9,6 +9,7 @@ app = Flask(__name__)
 app.config['DEBUG'] = True      # displays runtime errors in the browser, too
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://flicklist:xnynzn987@localhost:3306/build_blog'
 app.config['SQLALCHEMY_ECHO'] = True
+app.config['SECRET_KEY'] = 'afb9f6e868924eb4a14dba93aea625cc'
 
 db = SQLAlchemy(app)
 
@@ -34,67 +35,137 @@ class User(db.Model):
     password = db.Column(db.String(512))
     posts = db.relationship('Post', backref='owner')
 
-    def __init__(self, username, email, password):
+    def __init__(self, username,  password):
         self.username = username
-        self.email = email
         self.password = password
-
 
     def __repr__(self):
         return '<User %r>' % self.username
 
 
 #--------------------------------------------------
-@app.route('/posts')
-def posts():
-    posts = Post.query.order_by('id desc').all()
-    return render_template('main.html', posts=posts)
-
+@app.before_request
+def require_login():
+    allowed_routes = [ 'login', 'signup' ,'posts', 'users']
+    if request.endpoint not in allowed_routes and 'username' not in session:
+        return redirect('/login')
 
 #--------------------------------------------------
-@app.route('/newpost', methods=["GET","POST"])
-def newpost():
-#   SHOULD not not not DO THIS; I'm just making up for the absence
-# of a Post object in the GET
-    if request.method == "POST":
-        title = request.form['title'].strip()
-        article = request.form['article'].strip()
-        post = Post(title,article)
-        if len(title) > 0 and len(article) > 0:
-            db.session.add(post)
-            db.session.commit()
-            return render_template("article.html", post = post)
-        else:
-            return render_template('newpost.html', post=post, error=True)
-    title=''
-    article=''
-    dummy_post = Post(title,article)
-    return render_template('newpost.html', post=dummy_post, error = False)
+@app.route('/posts')
+def posts():
+    id = request.args.get('id')
+    if id:
+        posts = Post.query.filter_by(owner_id=int(id)).order_by('time_created desc').all()
+    else:
+        posts = Post.query.order_by('id desc').all()
+
+    return render_template('main.html', posts=posts)
 
 #--------------------------------------------------
 @app.route('/', methods=["GET","POST"])
 def index():
     return  render_template("index.html")
 
+#--------------------------------------------------
+@app.route('/index')
+def users():
+    users = User.query.order_by('username').all()
+    return render_template('index.html', users=users)
+
+#--------------------------------------------------
+@app.route('/newpost', methods=["GET","POST"])
+def newpost():
+    if request.method == "POST":
+        title = request.form['title'].strip()
+        article = request.form['article'].strip()
+
+        owner = User.query.filter_by(username=session['username']).first()
+
+        post = Post(title,article,owner)
+        if len(title) > 0 and len(article) > 0:
+            db.session.add(post)
+            db.session.commit()
+            return render_template("article.html", post = post)
+        else:
+            flash("Include a title and a body for the post","error")
+            return render_template('newpost.html', post=post, error=True)
+    return render_template('newpost.html', error = False)
+
 
 #--------------------------------------------------
 @app.route('/login', methods=["GET","POST"])
 def login():
-    # if valid: put username in session and return /newpost
-    # if NOT username: return to /login with error message #1
-    # if NOT password: return to /login with error message #2
+    if request.method == "POST":
+
+        username = request.form.get('username').strip()
+        password = request.form.get('password').strip()
+        user = User.query.filter_by(username=username).first()
+
+        if user and user.password == password: # the username is in the d/b
+            session["username"]=username
+            session['user_id']=user.id
+            return redirect("/newpost")
+        elif not user:  # not even the username in the d/b
+            flash("User name not found. Sign up to create an account.","error")
+            return redirect('/login')
+        else: # username, but wrong p/w: render_template gives a way to pass back the [correct] username
+            flash("Invalid password","error")
+            return render_template('login.html',username=username)
 
     return render_template("login.html")
 
 #--------------------------------------------------
-@app.route('/logout', methods=["POST"])
+@app.route('/logout')
 def logout():
-    return redirect("posts.html")
+    if 'username' in session:
+        del session['username']
+    if 'user_id' in session:
+        del session['user_id']
+
+    return redirect("posts")
 
 
 #--------------------------------------------------
 @app.route('/signup', methods=["GET","POST"])
 def signup():
+
+    if request.method == "POST":
+        username = request.form['username'].strip()
+        # username = username.strip()
+
+        password = request.form['password'].strip()
+        # password = password.strip()
+
+        verify = request.form['verify'].strip()
+        # verify = verify.strip()
+
+        if not (len(username) > 2 and len(password) > 2):
+            flash("Username and password must be more than two characters", "error")
+            return render_template("/signup.html", username=username)
+        # pw_match = False  # init
+        #    validate
+        # if password == verify:
+            # pw_match = True
+        if password == verify:
+
+            existing_user = User.query.filter_by(username=username).first()
+            if not existing_user:
+                new_user = User(username, password)
+                db.session.add(new_user)
+                db.session.commit()
+                session['username'] = username
+                return redirect("/newpost")
+            else:
+                flash("The user is already registered.",  "error")
+                return render_template("/signup.html", show_login_link=True )
+        else:
+            flash("Passwords must match", "error")
+            return render_template("/signup.html", username=username)
+    return render_template("/signup.html", msg="" )
+
+
+
+
     return render_template("signup.html")
 
 #--------------------------------------------------

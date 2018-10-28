@@ -5,6 +5,6 @@
 
   <h4 class="title" style="color:purple;">{{ post.title}}</h4>
   <p>{{ post.body }}</p>
-  <p class='post-author'>Created: {{ post.time_created }}</p>
+<p class='post-author'>By: <a href="/posts?id={{ post.owner_id }}"> {{ post.owner.username }}</a> {{ post.time_created }}</p>
 
 {% endblock %}
