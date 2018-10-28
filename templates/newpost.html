@@ -4,11 +4,7 @@
 {% block content%}
 <h2 style="text-align:center;">New post</h2>
 
-
 <form  action="" method="POST">
-    {% if error %}
-      <h4 class="error">Please enter a title and a body for the new post.</h4>
-    {% endif %}
 
     <label for="title">Title</label>
     <input type="text" name="title"

@@ -62,9 +62,9 @@ def posts():
     return render_template('main.html', posts=posts)
 
 #--------------------------------------------------
-@app.route('/', methods=["GET","POST"])
+@app.route('/')
 def index():
-    return  render_template("index.html")
+    return  redirect(url_for('posts'))
 
 #--------------------------------------------------
 @app.route('/index')
@@ -88,8 +88,8 @@ def newpost():
             return render_template("article.html", post = post)
         else:
             flash("Include a title and a body for the post","error")
-            return render_template('newpost.html', post=post, error=True)
-    return render_template('newpost.html', error = False)
+            return render_template('newpost.html', post=post)
+    return render_template('newpost.html')
 
 
 #--------------------------------------------------
@@ -124,28 +124,19 @@ def logout():
 
     return redirect("posts")
 
-
 #--------------------------------------------------
 @app.route('/signup', methods=["GET","POST"])
 def signup():
 
     if request.method == "POST":
         username = request.form['username'].strip()
-        # username = username.strip()
-
         password = request.form['password'].strip()
-        # password = password.strip()
-
         verify = request.form['verify'].strip()
-        # verify = verify.strip()
 
         if not (len(username) > 2 and len(password) > 2):
             flash("Username and password must be more than two characters", "error")
             return render_template("/signup.html", username=username)
-        # pw_match = False  # init
-        #    validate
-        # if password == verify:
-            # pw_match = True
+
         if password == verify:
 
             existing_user = User.query.filter_by(username=username).first()
@@ -157,21 +148,17 @@ def signup():
                 return redirect("/newpost")
             else:
                 flash("The user is already registered.",  "error")
-                return render_template("/signup.html", show_login_link=True )
+                return render_template("/signup.html" )
         else:
             flash("Passwords must match", "error")
             return render_template("/signup.html", username=username)
-    return render_template("/signup.html", msg="" )
-
-
-
-
-    return render_template("signup.html")
+    return render_template("/signup.html" )
 
 #--------------------------------------------------
 @app.route('/article/<int:id>', methods=["GET","POST"])
 def article(id):
     post = Post.query.get(id)
     return render_template("article.html", post = post)
+
 
 app.run()

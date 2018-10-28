@@ -9,16 +9,13 @@
         <tr>
           <td><label for="username">User name</label></td>
           <td>
-            <input name="username" type="text" value="{{ username }}"><td class="error">{{ username_error }}</td>
+            <input name="username" type="text" value="{{ username }}">
           </td>
-          <td>{{ error }}</td>
         </tr>
-
-
         <tr>
           <td><label for="password">Password</label></td>
           <td>
-            <input name="password" type="password"><td class="error">{{ password_error }}</td>
+            <input name="password" type="password">
             <span class="error"></span>
           </td>
         </tr>
@@ -32,6 +29,5 @@
       </table>
       <input type="submit"  value="Submit">
     </form>
-
 
 {% endblock %}

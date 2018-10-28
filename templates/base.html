@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
     <link href="static/blog.css" rel="stylesheet">
 
-    </head>
+  </head>
 
 
   <body>
@@ -41,32 +41,27 @@
                   <a class="nav-link" href="{{ url_for('login')}}">Log in</a>
                 </li>
 
-
-
               {% endif %}
             </ul>
       </nav>
 
-                  {% if session['username'] %}
+      {% if session['username'] %}
+              <p style="font-size: 14px; font-style:italic;">  Logged in: {{ session['username']}}</p>
+      {% endif %}
 
-                    <p style="font-size: 14px; font-style:italic;">  Logged in: {{ session['username']}}</p>
-
-                  {% endif %}
-
-              {% with messages = get_flashed_messages(with_categories=True) %}
-              <ul>
-                {% for category, message  in messages %}
-                <li class='{{ category }}'>{{ message }}</li>
-                {% endfor%}
-              {% endwith%}
-              </ul>
-
+    {% with messages = get_flashed_messages(with_categories=True) %}
+          <ul>
+            {% for category, message  in messages %}
+            <li class='{{ category }}'>{{ message }}</li>
+            {% endfor%}
+    {% endwith%}
+          </ul>
 
 
 {% block content %}
 
 {% endblock %}
-</div>
+    </div>
 
   </body>
 </html>
