@@ -161,4 +161,4 @@ def article(id):
     return render_template("article.html", post = post)
 
 
-app.run()
+app.run(port=3307)
